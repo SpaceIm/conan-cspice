@@ -67,15 +67,15 @@ class CspiceConan(ConanFile):
         self._raise_if_not_supported_triplet()
 
     def _raise_if_not_supported_triplet(self):
-        os = self._get_os_or_subsystem()
+        the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        if os not in self._sources_idx_per_triplet:
-            raise ConanInvalidConfiguration("cspice does not support {0}".format(os))
-        if arch not in self._sources_idx_per_triplet[os]:
-            raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(os, arch))
-        if compiler not in self._sources_idx_per_triplet[os][arch]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, os, arch))
+        if the_os not in self._sources_idx_per_triplet:
+            raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
+        if arch not in self._sources_idx_per_triplet[the_os]:
+            raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(the_os, arch))
+        if compiler not in self._sources_idx_per_triplet[the_os][arch]:
+            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
 
     def _get_os_or_subsystem(self):
         if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
@@ -96,11 +96,20 @@ class CspiceConan(ConanFile):
         cmake.build()
 
     def _get_sources(self):
-        os = self._get_os_or_subsystem()
+        the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        sources_idx = self._sources_idx_per_triplet[os][arch][compiler]
-        tools.get(**self.conan_data["sources"][self.version][sources_idx])
+        source_idx = self._sources_idx_per_triplet[the_os][arch][compiler]
+        source = self.conan_data["sources"][self.version][source_idx]
+        url = source["url"]
+        if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
+            filename = os.path.basename(url)
+            tools.download(url, filename, sha256=source["sha256"])
+            command = "zcat {} | tar -xf -".format(filename)
+            self.run(command=command)
+            os.remove(filename)
+        else:
+            tools.get(**source)
 
     def _configure_cmake(self):
         if self._cmake:
