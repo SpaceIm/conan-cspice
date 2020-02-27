@@ -1,5 +1,4 @@
 import os
-import time
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
