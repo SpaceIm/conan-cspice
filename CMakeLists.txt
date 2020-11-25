@@ -47,9 +47,8 @@ if(BUILD_UTILITIES)
   add_library(csupport OBJECT ${CSUPPORT_SRC_FILES})
 
   # Walk into all utilities subfolders and build them (except cook_c which only contains examples)
-  set(CSPICE_UTILITIES_SUBDIRS brief_c chrnos_c ckbref_c commnt_c dskbrief_c dskexp_c
-                               frmdif_c inspkt_c mkdsk_c mkspk_c msopck_c spacit_c
-                               spkdif_c spkmrg_c tobin_c toxfr_c versn_c)
+  file(GLOB CSPICE_UTILITIES_SUBDIRS RELATIVE ${SRC_DIR} "${SRC_DIR}/*_c")
+  list(REMOVE_ITEM CSPICE_UTILITIES_SUBDIRS "cook_c")
   foreach(CSPICE_SUBDIR ${CSPICE_UTILITIES_SUBDIRS})
     set(UTILITY_SRC_DIR "${SRC_DIR}/${CSPICE_SUBDIR}")
 
