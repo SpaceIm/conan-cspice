@@ -42,10 +42,9 @@ file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/*.h
 install(FILES ${INCLUDE_FILES} DESTINATION include)
 
 if(BUILD_UTILITIES)
-  # csupport lib is common to all utilities, but not intended to be used as a lib by consumers
+  # csupport is common to all utilities
   file(GLOB CSUPPORT_SRC_FILES "${SRC_DIR}/csupport/*.c")
-  add_library(csupport STATIC ${CSUPPORT_SRC_FILES})
-  target_link_libraries(csupport PRIVATE cspice)
+  add_library(csupport OBJECT ${CSUPPORT_SRC_FILES})
 
   # Walk into all utilities subfolders and build them (except cook_c which only contains examples)
   set(CSPICE_UTILITIES_SUBDIRS brief_c chrnos_c ckbref_c commnt_c dskbrief_c dskexp_c
@@ -57,36 +56,49 @@ if(BUILD_UTILITIES)
     # Each .pgm file is the entry point of an executable
     file(GLOB PGM_FILES "${UTILITY_SRC_DIR}/*.pgm")
 
-    # Remove (only required in Windows source code?):
-    # - existing main.c file
-    # - .c files with the same name than .pgm files
+    # Remove existing main.c file if any (in Windows source code only?)
     file(REMOVE "${UTILITY_SRC_DIR}/main.c")
-    foreach(PGM_FILE ${PGM_FILES})
-      get_filename_component(PGM_FILENAME ${PGM_FILE} NAME_WE)
-      file(REMOVE "${UTILITY_SRC_DIR}/${PGM_FILENAME}.c")
-    endforeach()
 
-    # Generate a local static lib from existing .c files
+    # Source files common to all executables in this subfolder
     file(GLOB CSPICE_UTILITY_SRC_FILES ${UTILITY_SRC_DIR}/*.c)
+    foreach(PGM_FILE ${PGM_FILES})
+      get_filename_component(CSPICE_UTILITY ${PGM_FILE} NAME_WE)
+      get_filename_component(PGM_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}_main.c" ABSOLUTE)
+      get_filename_component(GENERIC_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}.c" ABSOLUTE)
+      list(REMOVE_ITEM CSPICE_UTILITY_SRC_FILES "${PGM_MAIN_SRC_FILE}" "${GENERIC_MAIN_SRC_FILE}")
+    endforeach()
     if(CSPICE_UTILITY_SRC_FILES)
-      add_library(${CSPICE_SUBDIR}_OBJ OBJECT ${CSPICE_UTILITY_SRC_FILES})
+      add_library(${CSPICE_SUBDIR}_commonlib OBJECT ${CSPICE_UTILITY_SRC_FILES})
     endif()
 
-    # Generate one executable per pgm file
+    # Build one executable per pgm file
     foreach(PGM_FILE ${PGM_FILES})
-      # Generate:
-      # - <pgm_filename>_main.c file from .pgm file
-      # - <pgm_filename>.c from main.x file:
       get_filename_component(CSPICE_UTILITY ${PGM_FILE} NAME_WE)
+
+      # Generate <pgm_filename>_main.c file from .pgm file
       set(PGM_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}_main.c")
+      add_custom_target(${CSPICE_UTILITY}_PGM DEPENDS ${PGM_FILE} ${PGM_MAIN_SRC_FILE})
+      add_custom_command(
+        OUTPUT ${PGM_MAIN_SRC_FILE}
+        DEPENDS ${PGM_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PGM_FILE} ${PGM_MAIN_SRC_FILE}
+      )
+
+      # Generate <pgm_filename>.c from main.x file
+      set(INPUT_MAIN_FILE "${UTILITY_SRC_DIR}/main.x")
       set(GENERIC_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}.c")
-      configure_file(${PGM_FILE} ${PGM_MAIN_SRC_FILE} COPYONLY)
-      configure_file("${UTILITY_SRC_DIR}/main.x" ${GENERIC_MAIN_SRC_FILE} COPYONLY)
+      add_custom_target(${CSPICE_UTILITY}_MAIN DEPENDS ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE})
+      add_custom_command(
+        OUTPUT ${GENERIC_MAIN_SRC_FILE}
+        DEPENDS ${INPUT_MAIN_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE}
+      )
 
       add_executable(${CSPICE_UTILITY} ${PGM_MAIN_SRC_FILE} ${GENERIC_MAIN_SRC_FILE})
+      add_dependencies(${CSPICE_UTILITY} ${CSPICE_UTILITY}_PGM ${CSPICE_UTILITY}_MAIN)
       target_link_libraries(${CSPICE_UTILITY} PRIVATE csupport cspice)
-      if(TARGET ${CSPICE_SUBDIR}_OBJ)
-        target_link_libraries(${CSPICE_UTILITY} PRIVATE ${CSPICE_SUBDIR}_OBJ)
+      if(TARGET ${CSPICE_SUBDIR}_commonlib)
+        target_link_libraries(${CSPICE_UTILITY} PRIVATE ${CSPICE_SUBDIR}_commonlib)
       endif()
       if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         target_link_libraries(${CSPICE_UTILITY} PRIVATE m)
