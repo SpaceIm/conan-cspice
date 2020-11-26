@@ -17,12 +17,12 @@ class CspiceConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_utilities": [True, False]
+        "utilities": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_utilities": True
+        "utilities": True
     }
 
     _cmake = None
@@ -91,7 +91,7 @@ class CspiceConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_UTILITIES"] = self.options.build_utilities
+        self._cmake.definitions["BUILD_UTILITIES"] = self.options.utilities
         self._cmake.configure()
         return self._cmake
 
@@ -105,7 +105,7 @@ class CspiceConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
 
-        if self.options.build_utilities:
+        if self.options.utilities:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
