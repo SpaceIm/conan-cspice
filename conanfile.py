@@ -51,13 +51,19 @@ class CspiceConan(ConanFile):
         sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
         the_os = self._get_os_or_subsystem()
         if the_os not in sources_url_per_triplet:
-            raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
+            raise ConanInvalidConfiguration(
+                "cspice N{} does not support {0}".format(self.version, the_os)
+            )
         compiler = str(self.settings.compiler)
         if compiler not in sources_url_per_triplet[the_os]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1}".format(compiler, the_os))
+            raise ConanInvalidConfiguration(
+                "cspice N{} does not support {0} on {1}".format(self.version, compiler, the_os)
+            )
         arch = str(self.settings.arch)
         if arch not in sources_url_per_triplet[the_os][compiler]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
+            raise ConanInvalidConfiguration(
+                "cspice N{} does not support {0} on {1} {2}".format(self.version, compiler, the_os, arch)
+            )
 
     def _get_os_or_subsystem(self):
         if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
@@ -96,7 +102,7 @@ class CspiceConan(ConanFile):
             tools.patch(**patch)
         # TODO: find a more elegant patch, there is likely some conflict between
         #       fio.h and io.h in 0067 but the diff with 0066 is not obvious.
-        if self.settings.compiler in ["Visual Studio", "msvc"] and self.version == "0067":
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and self.version == "0067":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "cspice", "fio.h"),
                                   "extern int isatty(int);", "")
 
