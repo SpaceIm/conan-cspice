@@ -13,9 +13,7 @@ add_library(cspice ${CSPICE_SRC_FILES})
 
 if(WIN32)
   target_compile_definitions(cspice PRIVATE "_COMPLEX_DEFINED;MSDOS;OMIT_BLANK_CC;NON_ANSI_STDIO")
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(cspice PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-  endif()
+  set_target_properties(cspice PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 elseif(UNIX)
   target_compile_definitions(cspice PRIVATE "NON_UNIX_STDIO")
   target_compile_options(cspice PRIVATE -ansi)
@@ -27,7 +25,8 @@ endif()
 
 # Behavior of implicitly defined functions changed in AppleClang 12
 # https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND
+   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
   target_compile_options(cspice PRIVATE -Wno-error=implicit-function-declaration)
 endif()
 
