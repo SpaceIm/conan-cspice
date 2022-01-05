@@ -26,7 +26,7 @@ file(GLOB CSPICE_SRC_FILES ${SRC_DIR}/cspice/*.c)
 add_library(cspice ${CSPICE_SRC_FILES})
 
 if(WIN32)
-  target_compile_definitions(cspice PRIVATE "_COMPLEX_DEFINED;MSDOS;OMIT_BLANK_CC;NON_ANSI_STDIO")
+  target_compile_definitions(cspice PRIVATE "_COMPLEX_DEFINED;MSDOS;OMIT_BLANK_CC;NON_ANSI_STDIO;_CRT_SECURE_NO_WARNINGS")
   set_target_properties(cspice PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 elseif(UNIX)
   target_compile_definitions(cspice PRIVATE "NON_UNIX_STDIO")
