@@ -9,22 +9,22 @@ include(GNUInstallDirs)
 option(BUILD_UTILITIES "Build cspice utilities" ON)
 
 add_compile_options(
-  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:"-Wno-implicit-int">
-  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:"-Wno-format>"
-  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:"-Wno-pointer-to-int-cast">
-  $<$<C_COMPILER_ID:AppleClang>:"-Wno-logical-op-parentheses">
-  $<$<C_COMPILER_ID:AppleClang>:"-Wno-shift-op-parentheses">
-  $<$<C_COMPILER_ID:AppleClang>:"-Wno-parentheses">
-  $<$<C_COMPILER_ID:AppleClang>:"-Wno-dangling-else">
-  $<$<C_COMPILER_ID:AppleClang>:"-Wno-unsequenced">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4101">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4244">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4267">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4311">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4477">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4554">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4723">
-  $<$<C_COMPILER_ID:MSVC>:"/wd4996">
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-implicit-int>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-format>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-pointer-to-int-cast>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-logical-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-shift-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-dangling-else>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-unsequenced>
+  $<$<C_COMPILER_ID:MSVC>:/wd4101>
+  $<$<C_COMPILER_ID:MSVC>:/wd4244>
+  $<$<C_COMPILER_ID:MSVC>:/wd4267>
+  $<$<C_COMPILER_ID:MSVC>:/wd4311>
+  $<$<C_COMPILER_ID:MSVC>:/wd4477>
+  $<$<C_COMPILER_ID:MSVC>:/wd4554>
+  $<$<C_COMPILER_ID:MSVC>:/wd4723>
+  $<$<C_COMPILER_ID:MSVC>:/wd4996>
   # Behavior of implicitly defined functions changed in AppleClang 12
   # https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
   $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:"-Wno-error=implicit-function-declaration">
