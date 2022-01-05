@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.7)
 project(cspice C)
 
 include(conanbuildinfo.cmake)
@@ -7,6 +7,18 @@ conan_basic_setup()
 include(GNUInstallDirs)
 
 option(BUILD_UTILITIES "Build cspice utilities" ON)
+
+add_compile_options(
+  $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:-Wno-error=implicit-function-declaration>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-logical-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-shift-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-dangling-else>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-unsequenced>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-implicit-int>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-format>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-pointer-to-int-cast>
+)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
 
@@ -25,13 +37,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries(cspice PRIVATE m)
 endif()
 
-# Behavior of implicitly defined functions changed in AppleClang 12
-# https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND
-   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
-  target_compile_options(cspice PRIVATE -Wno-error=implicit-function-declaration)
-endif()
-
 install(
   TARGETS cspice
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -45,7 +50,7 @@ install(FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(BUILD_UTILITIES)
   # csupport is common to all utilities
   file(GLOB CSUPPORT_SRC_FILES "${SRC_DIR}/csupport/*.c")
-  add_library(csupport OBJECT ${CSUPPORT_SRC_FILES})
+  add_library(csupport STATIC ${CSUPPORT_SRC_FILES})
 
   # Walk into all utilities subfolders and build them (except cook_c which only contains examples)
   file(GLOB CSPICE_UTILITIES_SUBDIRS RELATIVE ${SRC_DIR} "${SRC_DIR}/*_c")
