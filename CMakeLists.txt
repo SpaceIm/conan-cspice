@@ -27,7 +27,7 @@ add_compile_options(
   $<$<C_COMPILER_ID:MSVC>:/wd4996>
   # Behavior of implicitly defined functions changed in AppleClang 12
   # https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
-  $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:"-Wno-error=implicit-function-declaration">
+  $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:-Wno-error=implicit-function-declaration>
 )
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
