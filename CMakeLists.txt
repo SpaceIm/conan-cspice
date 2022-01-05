@@ -12,12 +12,12 @@ add_compile_options(
   $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:-Wno-error=implicit-function-declaration>
   $<$<C_COMPILER_ID:AppleClang>:-Wno-logical-op-parentheses>
   $<$<C_COMPILER_ID:AppleClang>:-Wno-shift-op-parentheses>
-  $<$<C_COMPILER_ID:AppleClang>:-Wno-implicit-int>
   $<$<C_COMPILER_ID:AppleClang>:-Wno-parentheses>
   $<$<C_COMPILER_ID:AppleClang>:-Wno-dangling-else>
   $<$<C_COMPILER_ID:AppleClang>:-Wno-unsequenced>
-  $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-format>
-  $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-pointer-to-int-cast>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-implicit-int>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-format>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-pointer-to-int-cast>
 )
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
